@@ -1,0 +1,531 @@
+/*
+ * Copyright (c) 2021, Beatrice Borsari
+ *
+ * This file is part of 'eQTLs.model-nf':
+ * A Nextflow pipeline for predicting tissue-active eQTLs from chromatin features.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+// Define parameters
+// Most of them are defined in the config file
+
+params.index = null
+params.outFolder = 'results'
+
+
+// Print usage
+
+if (params.help) {
+    log.info ''
+    log.info 'eQTLs.model-nf: A Nextflow pipeline for predicting tissue-active eQTLs from epigenetics features.'
+    log.info '=============================================================================================='
+    log.info 'The pipeline takes as input one-gene eQTLs from a donor tissue and predicts which of them are active in a target tissue.'
+    log.info ' '
+    log.info 'Usage: '
+    log.info '    nextflow run eQTLs.model.nf [options]'
+    log.info ''
+    log.info 'Parameters:'
+    log.info ' --index			    Index file containing target tissue info.'
+    log.info ' --outFolder	            Output directory (default: results).'
+    log.info ' --dt			    Donor tissue providing the list of eQTLs to be predicted in a target tissue.'
+    log.info ' --eqtls_dt		    BED file containing all eQTLs in the donor tissue (chrom, start, end, tissue). NOTE: coordinates are 0-based.'
+    log.info ' --eqtls_slope_distance_dt    File containing SNP, gene_id, tss_distance, slope for every eQTL-gene pair in donor tissue. This info is obtained from the GTEx file'
+    log.info ' --eqtls_oneGene_dt           File containing one-gene eQTLs in the donor tissue (chrom_start_end). NOTE: coordinates are 0-based.'
+    log.info ' --exp_list		    File containing a list of all EN-TEx functional genomics experiments used for the predictions (bigBed file_id, target, tissue). bigBed = peaks file; target = histone mark / TF / ATAC / DNase.' 
+    log.info ' --bigbed_folder              Folder containing the files listed in "exp_list".'
+    log.info ' --entex_rnaseq_m             Matrix of TPM values for genes (rows) across samples (columns). NOTE: the file is gzipped.'
+    log.info ' --TSSs			    BED file containing all non-redundant TSSs +/- 2 Kb (if two isoforms have the same TSS, it will be counted only once). Chrom, start, end, transcript_id, placeholder, strand, gene_id.'        
+    log.info ' --cCREs			    BED file containing GRCh38 cCREs from ENCODE3.'
+    log.info ' --repeats             	    BED file containing repeated elements in GRCh38. NOTE: the file is gzipped.'
+    log.info ' --keep_only_tested_snps      Whether the prediction should be restrited to SNPs tested in the target tissue by GTEx (default: false).'
+    log.info ''
+    exit(1)
+}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains:
+// 1. donor_tissue eQTLs
+// 2. folder w/ bigBed files
+Channel.of(file(params.eqtls_dt), params.bigbed_folder)
+.collect()
+.set{start_ch}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create channels that contain: 
+// (a): target_tissue, target_tissue eQTLs (eqtls_tt), 
+// (b): target_tissue, target_tissue tested snps (tested_tt)
+index = file(params.index)
+
+Channel.from(index.readLines())
+.map { line ->
+  def list = line.tokenize()
+  def tt = list[0]
+  def eqtls_tt = resolveFile(list[1], index)
+  def tested_tt = resolveFile(list[2], index)
+  def signal_table_tt = resolveFile(list[3], index)
+  [ tt, eqtls_tt, tested_tt, signal_table_tt ]
+}
+.multiMap { it ->
+     a: it[0, 1]
+     b: it[0, 2]
+     c: it[0, 3]
+}.set{tt_ch}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains,
+// for every bigBed file,
+// 1. file_id
+// 2. target_assay (either histone mark, TF, ATAC, DNase)
+// 3. tissue in which the experiment was performed (can be also dt)
+exps = file(params.exp_list)
+
+Channel.from(exps.readLines())
+.map { line ->
+  def list = line.tokenize()
+  def file_id = list[0]
+  def target_assay = list[1]
+  def tissue = list[2]
+  [ file_id, target_assay, tissue ]
+}.set{bigbed_ch}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains,
+// for every bigBed file,
+// 1. donor_tissue eQTLs
+// 2. bigBed file
+// 3. file_id
+// 4. target_assay (either histone mark, TF, ATAC, DNase)
+// 5. tissue
+start_ch
+.combine(bigbed_ch)
+.map { it ->
+  [ it[0], file("$baseDir/"+it[1]+"/"+it[2]+".bigBed"), it[2], it[3], it[4] ]
+}
+.set{bedtools_ch}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// intersect eQTLs from donor tissue
+// w/ histone marks / TFs / ATAC and DNase
+// in every other tissue
+process bedtools_intersect {
+
+  publishDir "${params.outFolder}/bedfiles", overwrite: false
+
+  conda '/users/rg/bborsari/.conda/envs/ENCODE_RC/'
+
+  input:
+  tuple file(eqtls_dt), file(bigbed), file_id, target, tissue from bedtools_ch
+
+  output:
+  tuple target, tissue, file("${file_id}.bed") into aggregate_ch
+
+  script:
+
+  """
+  # bedtools intersect
+  intersect.peaks.cosi.regions.sh --regions $eqtls_dt --peaks $bigbed --outFile ${file_id}.bed
+
+  # keep only eQTLs with an intersection
+  awk '\$NF>0{print \$1"_"\$2"_"\$3}' ${file_id}.bed | sort -u > ${file_id}.bed.tmp 
+  mv ${file_id}.bed.tmp ${file_id}.bed
+  """
+
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains,
+// for a given target and tissue,
+// 1. donor_tissue eQTLs
+// 2. target_assay
+// 3. tissue
+// 4. tables of presence/absence of peaks
+Channel.of(file(params.eqtls_dt))
+.collect()
+.set{seed1_ch}
+
+seed1_ch
+.combine(aggregate_ch)
+.groupTuple(by: [0, 1, 2])
+.set{ready2aggregate_ch}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// aggregate experiments performed
+// for the same target (histone mark, TF, ATAC or DNase) 
+// in a given tissue
+// aka: for a given snp, 
+// if there is a peak in >= 1 donor: 1
+// else: 0
+process aggregate_exp {
+
+  publishDir "${params.outFolder}/agg.tables", overwrite: false
+
+  input:
+  tuple file(eqtls_dt), target, tissue, file(bed) from ready2aggregate_ch
+
+  output:
+  tuple target, file("${tissue}.${target}.tsv") into tissue_target_agg_ch_a
+  tuple tissue, file("${tissue}.${target}.tsv") into tissue_target_agg_ch_b
+
+  script:
+  """
+  awk 'BEGIN{FS="\t";OFS="_"}{print \$1,\$2,\$3}' $eqtls_dt > ${tissue}.${target}.tsv
+
+  for f in ${bed}; do
+	if [ -s \$f ];
+	then
+		join.py -b ${tissue}.${target}.tsv -a <(awk '{print \$0"\t"1}' \$f) -u -p 0 > ${tissue}.${target}.tmp;
+		mv ${tissue}.${target}.tmp ${tissue}.${target}.tsv
+	fi 
+  done
+
+  awk 'BEGIN{FS=OFS="\t"}{n=0; for (i=2;i<=NF;i++){if (\$i>0){n+=1}}; if (n>0){print \$1, 1} else {print \$1, 0}}' ${tissue}.${target}.tsv > ${tissue}.${target}.tmp
+  mv ${tissue}.${target}.tmp ${tissue}.${target}.tsv
+  """
+
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains,
+// for a given target,
+// 1. donor_tissue eQTLs
+// 2. tables of presence/absence of peaks for every tissue
+Channel.of(file(params.eqtls_dt))
+.collect()
+.set{seed2_ch}
+
+seed2_ch
+.combine(tissue_target_agg_ch_a)
+.groupTuple(by: [0, 1])
+.set{ready2build_byTarget_summary_table_ch}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// prepare a summary table by target
+// aka for each target register presence/absence 
+// of peaks in every profiled tissue
+
+process build_table_byTarget {
+
+  publishDir "${params.outFolder}/target.summary.tables", overwrite: false
+
+  input:
+  tuple file(eqtls_dt), target, file(tsv) from ready2build_byTarget_summary_table_ch
+
+  output:
+  file("${target}.summary.table.tsv") into byTarget_summary_table_ch
+
+  script:
+  """
+  awk 'BEGIN{FS="\t";OFS="_"}{print \$1,\$2,\$3}' $eqtls_dt > ${target}.summary.table.tsv
+
+  for f in ${tsv}; do
+	if [ -s \$f ];
+	then
+		tissue="\$(basename \$f | awk '{split(\$1, a, "."); print a[1]}')"
+		join.py -b ${target}.summary.table.tsv -a \$f |\
+		sed "1i\${tissue}" > ${target}.summary.table.tmp; 
+		mv ${target}.summary.table.tmp ${target}.summary.table.tsv
+	fi
+  done
+
+  awk 'BEGIN{FS=OFS="\t"}NR>1{a=0;n=(NF-1);for (i=2;i<=NF;i++){if (\$i>0){a+=1}}; print \$1, a/n}' ${target}.summary.table.tsv |\
+  sed "1i$target" > ${target}.summary.table.tmp
+  mv ${target}.summary.table.tmp ${target}.summary.table.tsv
+  """
+}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains
+// 1. all summary tables by Target
+byTarget_summary_table_ch
+.collect()
+.groupTuple()
+.flatten()
+.collect()
+.set{merge_byTarget_summary_table_ch}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// merge all summary tables by 
+// Target into a single file
+process merge_byTarget_summary_table {
+
+  publishDir "${params.outFolder}/target.summary.tables", overwrite: false
+
+  input:
+  file merge_byTarget_summary_table_ch
+
+  output:
+  file("targets.summary.table.tsv") into targets_table_ch
+
+  script:
+  """
+  paste <(sed 's/H3K27ac/SNP\tH3K27ac/' H3K27ac.summary.table.tsv) <(cut -f2 H3K4me3.summary.table.tsv) <(cut -f2 H3K4me1.summary.table.tsv) <(cut -f2 H3K27me3.summary.table.tsv) <(cut -f2 H3K36me3.summary.table.tsv) <(cut -f2 H3K9me3.summary.table.tsv) <(cut -f2 CTCF.summary.table.tsv) <(cut -f2 POLR2A.summary.table.tsv) <(cut -f2 POLR2AphosphoS5.summary.table.tsv) <(cut -f2 EP300.summary.table.tsv) <(cut -f2 ATAC.summary.table.tsv) <(cut -f2 DNase.summary.table.tsv) > targets.summary.table.tsv
+  """
+
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains,
+// for every tissue that is not the donor_tissue,
+// 1. target_tissue
+// 2. target_tissue eQTLs
+// 3. target_tissue tables of presence/absence peaks for every target_assay
+// 4. donor_tissue eQTLs
+Channel.of(file(params.eqtls_dt))
+.collect()
+.set{seed3_ch}
+
+tissue_target_agg_ch_b
+.groupTuple(by: [0], sort: {it.name})
+.filter({it[0] != params.dt})
+.concat(tt_ch.a)
+.groupTuple(by: [0])
+.map { line ->
+  def list = line
+  def tt = list[0]
+  def tables = list[1][0]
+  def eqtls = list[1][1]
+  [ tt, eqtls, tables ]
+}
+.combine(seed3_ch)
+.set{ready2build_byTissue_summary_table_ch}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// prepare a summary table by tissue
+// aka for each tissue register presence/absence
+// of peaks for every assayed target
+
+process build_table_byTissue {
+
+  publishDir "${params.outFolder}/tissue.summary.tables", overwrite: false
+
+  input:
+  tuple tissue, file(eqtls_tt), file(tsv), file(eqtls_dt) from ready2build_byTissue_summary_table_ch
+
+  output:
+  tuple tissue, file("${tissue}.summary.table.peaks.tsv") into byTissue_summary_table_ch
+
+  script:
+  """
+  # annotate whether an eQTL in the donor tissue is also eQTL in the target tissue
+  join.py -b <(awk 'BEGIN{FS="\t";OFS="_"}{print \$1,\$2,\$3}' $eqtls_dt) -a <(awk '{print \$1"_"\$2"_"\$3"\t"1}' $eqtls_tt) -u -p 0 |\
+  sed '1iSNP\tis_eQTL' > ${tissue}.summary.table.peaks.tsv
+
+  # for each target assayed in a given tissue
+  # concatenate the binary table of presence/absence of peaks
+  for f in ${tsv}; do
+        if [ -s \$f ];
+        then
+		target="\$(basename \$f | awk '{split(\$1, a, "."); print a[2]}')"
+		~/bin/join.py -b ${tissue}.summary.table.peaks.tsv -a \$f --b_header |\
+		sed "1s|V1|\${target}|" > ${tissue}.summary.table.peaks.tmp; 
+		mv ${tissue}.summary.table.peaks.tmp ${tissue}.summary.table.peaks.tsv;			
+	fi
+  done
+  """
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains:
+// 1. donor-tissue eQTLs that are associated to only one gene
+// 2. slope and tss_distance for donor-tissue eQTLs
+// 3. entex rnaseq matrix 
+Channel.of(file(params.eqtls_oneGene_dt), file(params.eqtls_slope_distance_dt), file(params.entex_rnaseq_m))
+.collect()
+.set{additional_features_ch_a}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains:
+// 1. donor-tissue eQTLs
+// 2. bed file of repeated regions
+// 3. bed file of ENCODE cCREs
+// 4. bed file of annotated TSSs (gencode v24)
+Channel.of(file(params.eqtls_dt), file(params.repeats), file(params.cCREs), file(params.TSSs))
+.collect()
+.set{ready2build_additional_features_ch_b}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// get table of donor_tissue eQTLs that
+// 1. are TSS-proximal (aka they intersect annotated TSSs)
+// 2. are outside repeated regions
+// 3. are inside ENCODE cCREs
+
+process get_additional_features_b {
+
+  publishDir "${params.outFolder}/additional.features", overwrite: false
+
+  conda '/users/rg/bborsari/.conda/envs/ENCODE_RC/'
+
+  input:
+  tuple file(eqtls_dt), file(repeats), file(cCREs), file(TSSs) from ready2build_additional_features_ch_b
+
+  output:
+  tuple file("out.of.repeat.eqtls.tsv"), file("in.cCREs.eqtls.tsv"), file("proximal.eqtls.tsv") into additional_features_ch_b
+
+  script:
+  """
+  # donor_tissue eQTLs that are proximal to annotated TSSs
+  bedtools intersect -a $eqtls_dt -b $TSSs -u |\
+  awk '{print \$1"_"\$2"_"\$3"\t"1}' > proximal.eqtls.tsv
+
+  # donor_tissue eQTLs that are outside of repeated regions
+  bedtools intersect -a $eqtls_dt -b <(zcat $repeats) -v |\
+  awk '{print \$1"_"\$2"_"\$3"\t"1}' > out.of.repeat.eqtls.tsv
+
+  # donor_tissue eQTLs that are inside ENCODE cCREs
+  bedtools intersect -a $eqtls_dt -b $cCREs -u |\
+  awk '{print \$1"_"\$2"_"\$3"\t"1}' > in.cCREs.eqtls.tsv
+  """
+
+}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// create a channel that contains:
+// 1. target tissue
+// 2. presence/absence of peaks summary table
+// 3. list of tested snps in target tissue
+// 4. kun's tables of chromatin signal around eqtls
+byTissue_summary_table_ch
+.concat(tt_ch.b)
+.concat(tt_ch.c)
+.groupTuple(by: [0])
+.map { line ->
+  def list = line
+  def tt = list[0]
+  def summary_table_tt = list[1][0]
+  def tested_snps_tt = list[1][1]
+  def signal_table_tt = list[1][2]
+  [ tt, summary_table_tt, tested_snps_tt, signal_table_tt ]
+}
+.set{ready2build_input4model_ch}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// prepare input table to run 
+// predictive model
+if (params.keep_only_tested_snps) {
+
+  process build_input4model_1 {
+
+  publishDir "${params.outFolder}/input.tables", overwrite: false
+
+  input:
+  tuple tissue, file(summary_table_tt), file(tested_snps_tt), file(signal_table_tt) from ready2build_input4model_ch
+  tuple file(oneGene_eqtls_dt), file(slope_distance_dt), file(entex_rnaseq_m) from additional_features_ch_a
+  tuple file(out_repeats_eqtls_dt), file(in_ccres_eqtls_dt), file(proximal_eqtls_dt) from additional_features_ch_b
+  file(targets_summary_table) from targets_table_ch
+
+  output:
+  tuple tissue, file("${tissue}.input4model.tsv") into input4model_ch
+
+  script:
+  """
+  input4model.R --target_tissue $tissue --input_matrix $summary_table_tt --outFile ${tissue}.input4model.tsv --keep_only_tested TRUE --tested_snps_tt $tested_snps_tt --one_gene_eqtls $oneGene_eqtls_dt --entex_rnaseq_m $entex_rnaseq_m --slope_distance $slope_distance_dt --out_repeats_eqtls $out_repeats_eqtls_dt --in_cCREs_eqtls $in_ccres_eqtls_dt --proximal_eqtls $proximal_eqtls_dt --signal_tables $signal_table_tt --proportion_marked_tissues $targets_summary_table
+  """
+  }
+
+}
+
+else {
+  
+  process build_input4model_2 {
+
+  publishDir "${params.outFolder}/input.tables", overwrite: false
+
+  input:
+  tuple tissue, file(summary_table_tt), file(tested_snps_tt), file(signal_table_tt) from ready2build_input4model_ch
+  tuple file(oneGene_eqtls_dt), file(slope_distance_dt), file(entex_rnaseq_m) from additional_features_ch_a
+  tuple file(out_repeats_eqtls_dt), file(in_ccres_eqtls_dt), file(proximal_eqtls_dt) from additional_features_ch_b
+  file(targets_summary_table) from targets_table_ch
+
+  output:
+  tuple tissue, file("${tissue}.input4model.tsv") into input4model_ch
+  
+  script:
+  """
+  input4model.R --target_tissue $tissue --input_matrix $summary_table_tt --outFile ${tissue}.input4model.tsv --keep_only_tested FALSE --tested_snps_tt $tested_snps_tt --one_gene_eqtls $oneGene_eqtls_dt --entex_rnaseq_m $entex_rnaseq_m --slope_distance $slope_distance_dt --out_repeats_eqtls $out_repeats_eqtls_dt --in_cCREs_eqtls $in_ccres_eqtls_dt --proximal_eqtls $proximal_eqtls_dt --signal_tables $signal_table_tt --proportion_marked_tissues $targets_summary_table
+  """
+
+  }
+
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// run predictive model
+process run_model {
+
+publishDir "${params.outFolder}/output.objs", overwrite: false
+
+input:
+tuple tissue, file("${tissue}.input4model.tsv") from input4model_ch
+
+output:
+tuple tissue, file("${tissue}.RData") into output4model_ch
+  
+script:
+"""
+rf.model.R -i ${tissue}.input4model.tsv -t $tissue -p 0.7 -m rf
+"""
+
+}
+
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// FUNCTIONS
+/*
+ * Given a string path resolve it against the index file location.
+ * Params:
+ * - str: a string value represting the file path to be resolved
+ * - index: path location against which relative paths need to be resolved
+ */
+def resolveFile( str, index ) {
+  if( str.startsWith('/') || str =~ /^[\w\d]*:\// ) {
+    return file(str)
+  }
+  else if( index instanceof Path ) {
+    return index.parent.resolve(str)
+  }
+  else {
+    return file(str)
+  }
+}
