@@ -54,15 +54,24 @@ Parameters:
 
 `eQTLs.model-nf` requires the following input data:
 
-* **Donor tissue.** The name of the tissue used as donor tissue (option `--dt`). 
+* **Donor tissue** (option `--dt`). The name of the tissue used as donor tissue. 
 
-* **eQTLs from donor tissue.**  eQTLs from donor tissue used for the predictions (option `--eqtls_dt`). This is a BED file containing chrom, start, end, tissue (coordinates are zero-based).
+* **eQTLs from donor tissue** (option `--eqtls_dt`). BED file containing all eQTLs reported in the donor tissue. See example below (coordinates are zero-based):
 
-* **eQTLs' features in donor tissue.** Slope and TSS-distance of eQTLs in donor tissue (option `--eqtls_slope_distance_dt`). This is a tsv file containing SNP_id (chrom_start_end), gene_id, tss_distance, slope for every eQTL-gene pair reported in the donor tissue (this info is, for instance, reported by GTEx). 
+```
+chrom	start	end	tissue
+```
 
-* **eQTLs from donor tissue linked to only one gene.** (option `--eqtls_oneGene_dt`). File contaning SNP_id (chrom_start_end) of eQTLs from donor tissue linked to only one gene. 
+* **Slope and TSS-distance of eQTLs in donor tissue** (option `--eqtls_slope_distance_dt`). This info is, for instance, reported by GTEx. Z-score can be an alternative measure to the slope. See example below:
 
-* **Index file.** This is a tab-delimited file that contains relevant info for the target tissue(s) (option `--index`). Here is an example of the file format:
+```
+SNP	gene_id	tss_distance	slope
+chr1_64763_64764	ENSG00000227232.5	35211	0.370865
+```
+
+* **One-gene eQTLs from donor tissue** (option `--eqtls_oneGene_dt`). One-column file contaning SNP_id (chrom_start_end) of donor-tissue eQTLs linked to only one gene. Our model predicts only one-gene eQTLs, for the time being. 
+
+* **Index file** (option `--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
 
 ```
 target_tissue1	/path/to/target_tissue1.eQTLs.bed	/path/to/target_tissue1.TestedSNPs.bed	/path/to/target_tissue1.ChromatinSignalTable.tsv
@@ -72,12 +81,12 @@ target_tissue3  /path/to/target_tissue3.eQTLs.bed       /path/to/target_tissue3.
 
 The fields in the file correspond to:
 
-1. Target tissue. We will predict which donor-tissue eQTLs are active in the target tissue. 
+1. Target tissue. We will predict which donor-tissue eQTLs are active in a given target tissue. Multiple models can be trained in parallel on multiple target tissues. 
 2. Path to BED file containing eQTLs in the target tissue (in our case we use GTEx eQTLs). This file contains chrom, start, end, tissue. NOTE: coordinates are 0-based.
 3. Path to BED file containing all SNPs tested in the target tissue (in our case we consider SNPs tested by GTEx). This file contains chrom, start, end, tissue. NOTE: coordinates are 0-based.
 4. Path to tsv file containing, for every chromatin feature available in the target tissue, the fold-change signal around the SNPs being predicted. This corresponds to the average fold-change signal in a +/- 5 Kb window centered at the SNP. 
 
-
+* **Chromatin experiments in target tissue(s)** (option `--exp_list`). tsv file containing a list of peak-calling files used for the predictions. These files correspond to experiments (ChIP/ATAC/DNase-seq) performed in the target tissue(s). The content of this file is: bigBed peaks file_id, target 
 
 
 
