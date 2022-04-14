@@ -59,14 +59,14 @@ Parameters:
 * **eQTLs from donor tissue** (option `--eqtls_dt`). BED file containing all eQTLs reported in the donor tissue. See example below (coordinates are zero-based):
 
 ```
-chrom	start	end	tissue
+chr1	64763	64764	Lung
 ```
 
 * **Slope and TSS-distance of eQTLs in donor tissue** (option `--eqtls_slope_distance_dt`). This info is, for instance, reported by GTEx. Z-score can be an alternative measure to the slope. See example below:
 
 ```
-SNP	gene_id	tss_distance	slope
-chr1_64763_64764	ENSG00000227232.5	35211	0.370865
+SNP			gene_id			tss_distance	slope
+chr1_64763_64764	ENSG00000227232.5	35211		0.370865
 ```
 
 * **One-gene eQTLs from donor tissue** (option `--eqtls_oneGene_dt`). One-column file contaning SNP_id (chrom_start_end) of donor-tissue eQTLs linked to only one gene. Our model predicts only one-gene eQTLs, for the time being. 
