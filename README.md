@@ -4,7 +4,7 @@ A Nextflow pipeline for predicting tissue-active eQTLs from chromatin features.
 
 The pipeline performs the following analysis steps:
 
-*
+* 
 *
 *
 
@@ -52,5 +52,23 @@ Parameters:
 
 ## Input files and format
 
+`eQTLs.model-nf` requires the following input files:
+
+* **Index file.** This is a tab-delimited file that should be passed to the pipeline command with the option `--index`. Here is an example of the file format:
+
+[source,bash]
+----
+target_tissue1	/path/to/target_tissue1.eQTLs.bed	/path/to/target_tissue1.TestedSNPs.bed	/path/to/target_tissue1.ChromatinSignalTable.tsv
+target_tissue2	/path/to/target_tissue2.eQTLs.bed	/path/to/target_tissue2.TestedSNPs.bed	/path/to/target_tissue2.ChromatinSignalTable.tsv
+target_tissue3  /path/to/target_tissue3.eQTLs.bed       /path/to/target_tissue3.TestedSNPs.bed  /path/to/target_tissue3.ChromatinSignalTable.tsv
+----
+
+
+The fields in the file correspond to:
+
+1. Target tissue. This is the tissue for which the eQTLs prediction is performed.
+2. Path to BED file containing eQTLs in the target tissue (in our case we use GTEx eQTLs). This file contains chrom, start, end, tissue. NOTE: coordinates are 0-based.
+3. Path to BED file containing all SNPs tested in the target tissue (in our case we consider SNPs tested by GTEx). This file contains chrom, start, end, tissue. NOTE: coordinates are 0-based.
+4. Path to tsv file containing, for every chromatin feature available in the target tissue, the fold-change signal around the SNPs being predicted. This corresponds to the average fold-change signal in a +/- 5 Kb window centered at the SNP. 
 
 ## Pipeline results
