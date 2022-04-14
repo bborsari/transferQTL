@@ -56,12 +56,11 @@ Parameters:
 
 * **Index file.** This is a tab-delimited file that should be passed to the pipeline command with the option `--index`. Here is an example of the file format:
 
-[source,bash]
-----
+```
 target_tissue1	/path/to/target_tissue1.eQTLs.bed	/path/to/target_tissue1.TestedSNPs.bed	/path/to/target_tissue1.ChromatinSignalTable.tsv
 target_tissue2	/path/to/target_tissue2.eQTLs.bed	/path/to/target_tissue2.TestedSNPs.bed	/path/to/target_tissue2.ChromatinSignalTable.tsv
 target_tissue3  /path/to/target_tissue3.eQTLs.bed       /path/to/target_tissue3.TestedSNPs.bed  /path/to/target_tissue3.ChromatinSignalTable.tsv
-----
+```
 
 
 The fields in the file correspond to:
