@@ -37,11 +37,11 @@ nextflow run eQTLs.model.nf [options]
 Parameters:
 --dt			    	Donor tissue providing the catalog of eQTLs to be predicted in the target tissue(s).
 --eqtls_dt		    	Donor-tissue eQTLs.
---eqtls_slope_distance_dt    	Slope and TSS-distance of eQTLs of donor-tissue eQTLs.
+--eqtls_slope_distance_dt    	Slope and TSS-distance of donor-tissue eQTLs.
 --eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one gene.
---exp_list		    	Functional genomics experiments used for the predictions.
---bigbed_folder              	Folder containing the files listed in "exp_list".
---entex_rnaseq_m             	Matrix of TPM values for genes (rows) across samples (columns). NOTE: the file is gzipped.
+--exp_list		    	Functional genomics experiments used for feature extraction.
+--bigbed_folder              	Directory containing the files listed in "exp_list".
+--entex_rnaseq_m             	EN-TEx TPM matrix.
 --TSSs			    	BED file containing all non-redundant TSSs +/- 2 Kb (if two isoforms have the same TSS, it will be counted only once). Chrom, start, end, transcript_id, placeholder, strand, gene_id.
 --cCREs			    	BED file containing GRCh38 cCREs from ENCODE3.
 --repeats             	    	BED file containing repeated elements in GRCh38. NOTE: the file is gzipped.
@@ -54,28 +54,28 @@ Parameters:
 
 `eQTLs.model-nf` requires the following input data:
 
-* **Donor tissue** (option `--dt`). The name of the tissue used as donor tissue. Example: `Lung`
+* **Donor tissue** (`--dt`). The name of the tissue used as donor tissue. Example: `Lung`
 
-* **eQTLs from donor tissue** (option `--eqtls_dt`). BED file containing all eQTLs reported in the donor tissue. See example below (coordinates are zero-based):
+* **Donor-tissue eQTLs** (`--eqtls_dt`). BED file containing all eQTLs reported in the donor tissue. See example below (coordinates are zero-based):
 
 ```
 chr1	64763	64764	Lung
 ```
 
-* **Slope and TSS-distance of eQTLs in donor tissue** (option `--eqtls_slope_distance_dt`). The info in this tsv file is, for instance, reported by GTEx. Z-score can be an alternative measure to the slope. See example below:
+* **Slope and TSS-distance of donor-tissue eQTLs** (`--eqtls_slope_distance_dt`). The info in this tsv file is, for instance, reported by GTEx. Z-score can be an alternative measure to the slope. See example below:
 
 ```
 SNP			gene_id			tss_distance	slope
 chr1_64763_64764	ENSG00000227232.5	35211		0.370865
 ```
 
-* **One-gene eQTLs from donor tissue** (option `--eqtls_oneGene_dt`). One-column file containing a list of one-gene eQTLs from donor tissue. For the time being, our predictions are restricted to eQTLs linked to only one gene in the donor tissue. See example below:
+* **Donor-tissue eQTLs linked to only one gene** (`--eqtls_oneGene_dt`). One-column file containing a list of eQTLs linked to only one gene in the donor tissue. See example below:
 
 ```
 chr1_64763_64764
 ```
 
-* **Chromatin experiments in target tissue(s)** (option `--exp_list`). tsv file containing a list of peak-calling bigBed files used for the predictions. These files correspond to EN-TEx experiments (ChIP/ATAC/DNase-seq) performed in target tissues.
+* **(Functional genomics experiments used for feature extraction)** (option `--exp_list`). tsv file containing a list of peak-calling bigBed files used to extract chromatin features of the donor-tissue eQTLs in the target tissue. These files correspond to EN-TEx functional genomics experiments (ChIP/ATAC/DNase-seq).
 
 ```
 ENCFF821QBE     CTCF            Adrenal_Gland
