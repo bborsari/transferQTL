@@ -100,9 +100,9 @@ chrX	100634688	100638689	ENST00000496771.5	0	-	ENSG00000000003.14
 
 * **GRCh38 repeats** (`--repeats`). [bgzip](http://www.htslib.org/doc/bgzip.html)-BED file containing repeated elements annotated in GRCh38. The file was downloaded from http://genome.ucsc.edu/cgibin/hgTables, after setting `group` = `repeats` and `track` = `Repeatmasker`.
 
-* **Keep only tested SNPs** (``--keep_only_tested_snps`). Whether to restrict the predictions only to donor-tissue eQTLs tested by GTEx for eQTL-gene association in the target tissue (default = false). The model performance can only be evaluated with SNPs that were tested for being eQTLs in the target tissue. 
+* **Keep only tested SNPs** (`--keep_only_tested_snps`). Whether to restrict the predictions only to donor-tissue eQTLs tested by GTEx for eQTL-gene association in the target tissue (default = false). The model performance can only be evaluated with SNPs that were tested for being eQTLs in the target tissue. 
 
-* **Index file** (option `--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
+* **Index file** (`--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
 
 ```
 Adrenal_Gland	/path/to/Adrenal_Gland.eQTLs.bed	/path/to/Adrenal_Gland.TestedSNPs.bed	/path/to/Adrenal_Glaand.ChromatinSignalTable.tsv
