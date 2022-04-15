@@ -75,7 +75,7 @@ chr1_64763_64764	ENSG00000227232.5	35211		0.370865
 chr1_64763_64764
 ```
 
-* **Chromatin experiments in target tissue(s)** (option `--exp_list`). tsv file containing a list of peak-calling files used for the predictions. These files correspond to EN-TEx exp$
+* **Chromatin experiments in target tissue(s)** (option `--exp_list`). tsv file containing a list of peak-calling files used for the predictions. These files correspond to EN-TEx experiments (ChIP/ATAC/DNase-seq) performed in target tissues.
 
 ```
 ENCFF821QBE     CTCF            Adrenal_Gland
