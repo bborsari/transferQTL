@@ -35,7 +35,7 @@ Usage:
 nextflow run eQTLs.model.nf [options]
 
 Parameters:
---dt			    	Donor tissue providing the catalog of eQTLs to be predicted in the target tissue(s).
+--dt			    	Donor tissue.
 --eqtls_dt		    	Donor-tissue eQTLs.
 --eqtls_slope_distance_dt    	Slope and TSS-distance of donor-tissue eQTLs.
 --eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one gene.
@@ -54,9 +54,9 @@ Parameters:
 
 `eQTLs.model-nf` requires the following input data:
 
-* **Donor tissue** (`--dt`). The name of the tissue used as donor tissue. Example: `Lung`
+* **Donor tissue** (`--dt`). The tissue providing the source catalog of eQTLs. The pipeline will predict whether these eQTLs are active in one or more target tissues. Example: `Lung`
 
-* **Donor-tissue eQTLs** (`--eqtls_dt`). BED file containing all eQTLs reported in the donor tissue. See example below (coordinates are zero-based):
+* **Donor-tissue eQTLs** (`--eqtls_dt`). BED file containing the source catalog of donor-tissue eQTLs. See example below (coordinates are zero-based):
 
 ```
 chr1	64763	64764	Lung
