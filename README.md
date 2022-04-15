@@ -39,13 +39,13 @@ Parameters:
 --eqtls_dt		    	Donor-tissue eQTLs.
 --eqtls_slope_distance_dt    	Slope and TSS-distance of eQTLs in donor tissue.
 --eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one gene.
---index                         Index file containing target tissue info.
---exp_list		    	Functional genomics experiments used for the predictions 
+--exp_list		    	Functional genomics experiments used for the predictions.
 --bigbed_folder              	Folder containing the files listed in "exp_list".
 --entex_rnaseq_m             	Matrix of TPM values for genes (rows) across samples (columns). NOTE: the file is gzipped.
 --TSSs			    	BED file containing all non-redundant TSSs +/- 2 Kb (if two isoforms have the same TSS, it will be counted only once). Chrom, start, end, transcript_id, placeholder, strand, gene_id.
 --cCREs			    	BED file containing GRCh38 cCREs from ENCODE3.
 --repeats             	    	BED file containing repeated elements in GRCh38. NOTE: the file is gzipped.
+--index                         Index file containing target tissue info.
 --keep_only_tested_snps      	Whether the prediction should be restrited to SNPs tested in the taregt tissue by GTEx (default: false).
 --outFolder                     Output directory (default: results).
 ```
@@ -62,17 +62,27 @@ Parameters:
 chr1	64763	64764	Lung
 ```
 
-* **Slope and TSS-distance of eQTLs in donor tissue** (option `--eqtls_slope_distance_dt`). This info is, for instance, reported by GTEx. Z-score can be an alternative measure to the slope. See example below:
+* **Slope and TSS-distance of eQTLs in donor tissue** (option `--eqtls_slope_distance_dt`). The info in this tsv file is, for instance, reported by GTEx. Z-score can be an alternative measure to the slope. See example below:
 
 ```
 SNP			gene_id			tss_distance	slope
 chr1_64763_64764	ENSG00000227232.5	35211		0.370865
 ```
 
-* **One-gene eQTLs from donor tissue** (option `--eqtls_oneGene_dt`). For the time being, our predictions are restricted to eQTLs linked to only one gene in the donor tissue. See example below:
+* **One-gene eQTLs from donor tissue** (option `--eqtls_oneGene_dt`). One-column file containing a list of one-gene eQTLs from donor tissue. For the time being, our predictions are restricted to eQTLs linked to only one gene in the donor tissue. See example below:
 
 ```
 chr1_64763_64764
+```
+
+* **Chromatin experiments in target tissue(s)** (option `--exp_list`). tsv file containing a list of peak-calling files used for the predictions. These files correspond to EN-TEx exp$
+
+```
+ENCFF821QBE     CTCF            Adrenal_Gland
+ENCFF945HXI     H3K27ac         Adrenal_Gland
+ENCFF459ANZ     POLR2A          Adrenal_Gland
+ENCFF036JMQ     H3K4me1         Adrenal_Gland
+ENCFF158ICO     ATAC            Adrenal_Gland
 ```
 
 * **Index file** (option `--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
@@ -105,17 +115,6 @@ chr1	10000043	10000044	Adrenal_Gland
 SNP			H3K27ac		H3K4me1		H3K9me3		CTCF		POLR2A		ATAC		DNase
 chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0.0263053
 ``` 
-
-* **Chromatin experiments in target tissue(s)** (option `--exp_list`). tsv file containing a list of peak-calling files used for the predictions. These files correspond to EN-TEx experiments (ChIP/ATAC/DNase-seq) performed in the target tissue(s). See example below:
-
-```
-ENCFF821QBE	H3K9me3		Adrenal_Gland
-ENCFF945HXI	H3K27ac		Adrenal_Gland
-ENCFF459ANZ	H3K36me3	Adrenal_Gland
-ENCFF036JMQ	H3K4me1		Adrenal_Gland
-ENCFF158ICO	H3K4me3		Adrenal_Gland
-```
-
 
 
 ## Pipeline results
