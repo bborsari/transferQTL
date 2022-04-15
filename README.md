@@ -42,8 +42,8 @@ Parameters:
 --exp_list		    	Functional genomics experiments used for feature extraction.
 --bigbed_folder              	Directory containing peak-calling files.
 --entex_rnaseq_m             	EN-TEx gene expression matrix.
---TSSs			    	BED file containing all non-redundant TSSs +/- 2 Kb (if two isoforms have the same TSS, it will be counted only once). Chrom, start, end, transcript_id, placeholder, strand, gene_id.
---cCREs			    	BED file containing GRCh38 cCREs from ENCODE3.
+--TSSs			    	List of annotated TSSs.
+--cCREs			    	GRCh38 cCREs from ENCODE3.
 --repeats             	    	BED file containing repeated elements in GRCh38. NOTE: the file is gzipped.
 --index                         Index file containing target tissue info.
 --keep_only_tested_snps      	Whether the prediction should be restrited to SNPs tested in the taregt tissue by GTEx (default: false).
@@ -94,6 +94,9 @@ ENCFF158ICO     ATAC            Adrenal_Gland
 ```
 chrX	100634688	100638689	ENST00000496771.5	0	-	ENSG00000000003.14
 ```
+
+* **GRCh38 cCREs from ENCODE3** (`--cCREs`). BED file containing GRCh38 cCREs from ENCODE3 (downloaded from [here]https://api.wenglab.org/screen_v13/fdownloads/GRCh38-ccREs.bed).
+
 
 * **Index file** (option `--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
 
