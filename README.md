@@ -4,9 +4,9 @@ A Nextflow pipeline for predicting tissue-active eQTLs from chromatin features.
 
 The pipeline performs the following analysis steps:
 
-* 
-*
-*
+* Feature extraction and preparation based on EN-TEx functional genomics assays. 
+* Prediction of donor-tissue eQTLs active in a target tissue (using Random Forest).
+
 
 The pipeline uses [Nextflow](http://www.nextflow.io) as the execution backend. Please check [Nextflow documentation](http://www.nextflow.io/docs/latest/index.html) for more information.
 
@@ -27,9 +27,9 @@ nextflow run eQTLs.model.nf --help
 N E X T F L O W  ~  version 20.10.0
 Launching `eQTLs.model.nf` [reverent_heisenberg] - revision: c5d78a089d
 
-eQTLs.model-nf: A pipeline for predicting tissue-active eQTLs.
+eQTLs.model-nf: A Nextflow pipeline for predicting tissue-active eQTLs.
 ==============================================================================================
-The pipeline takes as input one-gene eQTLs from a donor tissue and predicts which of them are active in one or more target tissues.
+The pipeline takes as input eQTLs from a donor tissue and predicts which of them are active in one or more target tissues.
 
 Usage:
 nextflow run eQTLs.model.nf [options]
@@ -135,3 +135,7 @@ chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0
 
 ## Pipeline results
 
+The output folder can be specified with `--outFolder`.  
+
+* Feature extraction. This involves multiple steps:
+** 
