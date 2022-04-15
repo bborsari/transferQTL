@@ -37,7 +37,7 @@ nextflow run eQTLs.model.nf [options]
 Parameters:
 --dt			    	Donor tissue providing the catalog of eQTLs to be predicted in the target tissue(s).
 --eqtls_dt		    	Donor-tissue eQTLs.
---eqtls_slope_distance_dt    	Slope and TSS-distance of eQTLs in donor tissue.
+--eqtls_slope_distance_dt    	Slope and TSS-distance of eQTLs of donor-tissue eQTLs.
 --eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one gene.
 --exp_list		    	Functional genomics experiments used for the predictions.
 --bigbed_folder              	Folder containing the files listed in "exp_list".
@@ -75,7 +75,7 @@ chr1_64763_64764	ENSG00000227232.5	35211		0.370865
 chr1_64763_64764
 ```
 
-* **Chromatin experiments in target tissue(s)** (option `--exp_list`). tsv file containing a list of peak-calling files used for the predictions. These files correspond to EN-TEx experiments (ChIP/ATAC/DNase-seq) performed in target tissues.
+* **Chromatin experiments in target tissue(s)** (option `--exp_list`). tsv file containing a list of peak-calling bigBed files used for the predictions. These files correspond to EN-TEx experiments (ChIP/ATAC/DNase-seq) performed in target tissues.
 
 ```
 ENCFF821QBE     CTCF            Adrenal_Gland
@@ -84,6 +84,11 @@ ENCFF459ANZ     POLR2A          Adrenal_Gland
 ENCFF036JMQ     H3K4me1         Adrenal_Gland
 ENCFF158ICO     ATAC            Adrenal_Gland
 ```
+
+* **Directory with peak-calling files** (option `--bigbed_folder`). Folder containing the files listed in `--exp_list`.
+
+* **EN-TEx gene expression matrix** (option `--entex_rnaseq_m`). [bgzip](http://www.htslib.org/doc/bgzip.html)-compressed matrix of TPM values for genes (rows) across donor_tissue samples (columns). 
+
 
 * **Index file** (option `--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
 
