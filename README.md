@@ -40,8 +40,8 @@ Parameters:
 --eqtls_slope_distance_dt    	Slope and TSS-distance of donor-tissue eQTLs.
 --eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one gene.
 --exp_list		    	Functional genomics experiments used for feature extraction.
---bigbed_folder              	Directory containing the files listed in "exp_list".
---entex_rnaseq_m             	EN-TEx TPM matrix.
+--bigbed_folder              	Directory containing peak-calling files.
+--entex_rnaseq_m             	EN-TEx gene expression matrix.
 --TSSs			    	BED file containing all non-redundant TSSs +/- 2 Kb (if two isoforms have the same TSS, it will be counted only once). Chrom, start, end, transcript_id, placeholder, strand, gene_id.
 --cCREs			    	BED file containing GRCh38 cCREs from ENCODE3.
 --repeats             	    	BED file containing repeated elements in GRCh38. NOTE: the file is gzipped.
@@ -75,7 +75,7 @@ chr1_64763_64764	ENSG00000227232.5	35211		0.370865
 chr1_64763_64764
 ```
 
-* **Functional genomics experiments used for feature extraction** (option `--exp_list`). tsv file containing a list of peak-calling bigBed files used to extract chromatin features of donor-tissue eQTLs in the relevant target tissue. These files correspond to EN-TEx functional genomics experiments (ChIP/ATAC/DNase-seq). See example below:
+* **Functional genomics experiments used for feature extraction** (`--exp_list`). tsv file containing a list of peak-calling bigBed files used to extract chromatin features of donor-tissue eQTLs in the relevant target tissue. These files correspond to EN-TEx functional genomics experiments (ChIP/ATAC/DNase-seq). See example below:
 
 ```
 ENCFF821QBE     CTCF            Adrenal_Gland
@@ -85,10 +85,15 @@ ENCFF036JMQ     H3K4me1         Adrenal_Gland
 ENCFF158ICO     ATAC            Adrenal_Gland
 ```
 
-* **Directory with peak-calling files** (option `--bigbed_folder`). Folder containing the files listed in `--exp_list`.
+* **Directory containing peak-calling files** (`--bigbed_folder`). Folder containing the files listed in `--exp_list`.
 
-* **EN-TEx gene expression matrix** (option `--entex_rnaseq_m`). [bgzip](http://www.htslib.org/doc/bgzip.html)-compressed matrix of TPM values for genes (rows) across donor_tissue samples (columns). 
+* **EN-TEx gene expression matrix** (`--entex_rnaseq_m`). [bgzip](http://www.htslib.org/doc/bgzip.html)-compressed matrix of TPM values for genes (rows) across donor_tissue samples (columns). 
 
+* **List of annotated TSSs** (`--TSSs`). BED file containing coordinates of all annotated TSSs +/- 2 Kb. See example below:
+
+```
+chrX	100634688	100638689	ENST00000496771.5	0	-	ENSG00000000003.14
+```
 
 * **Index file** (option `--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
 
@@ -123,3 +128,4 @@ chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0
 
 
 ## Pipeline results
+
