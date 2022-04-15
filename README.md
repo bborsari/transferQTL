@@ -75,7 +75,7 @@ chr1_64763_64764	ENSG00000227232.5	35211		0.370865
 chr1_64763_64764
 ```
 
-* **(Functional genomics experiments used for feature extraction)** (option `--exp_list`). tsv file containing a list of peak-calling bigBed files used to extract chromatin features of the donor-tissue eQTLs in the target tissue. These files correspond to EN-TEx functional genomics experiments (ChIP/ATAC/DNase-seq).
+* **Functional genomics experiments used for feature extraction** (option `--exp_list`). tsv file containing a list of peak-calling bigBed files used to extract chromatin features of donor-tissue eQTLs in the relevant target tissue. These files correspond to EN-TEx functional genomics experiments (ChIP/ATAC/DNase-seq). See example below:
 
 ```
 ENCFF821QBE     CTCF            Adrenal_Gland
