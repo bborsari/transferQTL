@@ -95,7 +95,9 @@ ENCFF158ICO     ATAC            Adrenal_Gland
 chrX	100634688	100638689	ENST00000496771.5	0	-	ENSG00000000003.14
 ```
 
-* **GRCh38 cCREs from ENCODE3** (`--cCREs`). BED file containing GRCh38 cCREs from ENCODE3 (downloaded from [here]http://api.wenglab.org/screen_v13/fdownloads/GRCh38-ccREs.bed).
+* **GRCh38 cCREs from ENCODE3** (`--cCREs`). BED file containing GRCh38 cCREs from ENCODE3 (downloaded from http://api.wenglab.org/screen_v13/fdownloads/GRCh38-ccREs.bed).
+
+* **GRCh38 repeats** (`--repeats`). [bgzip](http://www.htslib.org/doc/bgzip.html)-BED file containing repeated elements annotated in GRCh38. The file was downloaded from http://genome.ucsc.edu/cgibin/hgTables, after setting `group` = `repeats` and `track` = `Repeatmasker`.
 
 
 * **Index file** (option `--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
