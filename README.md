@@ -7,6 +7,7 @@ The pipeline performs the following analysis steps:
 * Feature extraction based on EN-TEx functional genomics assays. 
 * Prediction of donor-tissue eQTLs active in a target tissue (using Random Forest).
 
+![](https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/schema.png)
 
 The pipeline uses [Nextflow](http://www.nextflow.io) as the execution backend. Please check [Nextflow documentation](http://www.nextflow.io/docs/latest/index.html) for more information.
 
