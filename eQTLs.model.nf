@@ -241,7 +241,7 @@ seed2_ch
  * aka for each assay register presence/absence 
  * of peaks in every profiled tissue
  */
-process build_table_byTarget {
+process build_table_byAssay {
 
   publishDir "${params.outFolder}/assay.summary.tables", overwrite: false
 
