@@ -238,8 +238,10 @@ seed2_ch
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Process #3: Prepare a summary table by assay
- * aka for each assay register presence/absence 
- * of peaks in every profiled tissue
+ * aka for each SNP and assay register presence/absence 
+ * of peaks in every profiled tissue.
+ * Finally, for each SNP compute the 
+ * fraction of tissues w/ peaks of a given assay
  */
 process build_table_byAssay {
 
