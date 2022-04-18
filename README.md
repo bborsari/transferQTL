@@ -140,11 +140,11 @@ chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0
 The output folder can be specified with `--outFolder`.  
 
 * **Feature extraction** We are employing [39 features] (https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/features.pdf).
-* * Feature 1 is computed by `Process #7`.
-* * Features 2-3 are provided by the user (`--eqtls_slope_distance_dt`).
-* * Features 4-15 are computed by `Processes #1,2,5`.
-* * Features 17-24 are provided by the user (`--index`).
-* * Features 25-35 are computed by `Processes #1-4`.
-* * Features 37-39 are computed by `Processes #6`.
+  * Feature 1 is computed by `Process #7`.
+  * Features 2-3 are provided by the user (`--eqtls_slope_distance_dt`).
+  * Features 4-15 are computed by `Processes #1,2,5`.
+  * Features 17-24 are provided by the user (`--index`).
+  * Features 25-35 are computed by `Processes #1-4`.
+  * Features 37-39 are computed by `Processes #6`.
 
  
