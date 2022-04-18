@@ -4,8 +4,9 @@ A Nextflow pipeline for predicting tissue-active eQTLs from chromatin features.
 
 The pipeline performs the following analysis steps:
 
-* Feature extraction based on EN-TEx functional genomics assays. For more details see the [pipeline results](https://github.com/bborsari/eQTLs.model-nf#pipeline-results) section.
+* Feature extraction based on EN-TEx functional genomics assays. 
 * Prediction of donor-tissue eQTLs active in a target tissue (using Random Forest).
+For more details see [pipeline results] (https://github.com/bborsari/eQTLs.model-nf#pipeline-results).
 
 ![](https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/schema.png)
 
@@ -138,5 +139,12 @@ chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0
 
 The output folder can be specified with `--outFolder`.  
 
-* Feature extraction. This involves multiple steps:
-  > Intersect donor-tissue eQTLs with peaks from functional genomics  
+* **Feature extraction** We are employing [39 features] (https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/features.pdf).
+* * Feature 1 is computed by `Process #7`.
+* * Features 2-3 are provided by the user (`--eqtls_slope_distance_dt`).
+* * Features 4-15 are computed by `Processes #1,2,5`.
+* * Features 17-24 are provided by the user (`--index`).
+* * Features 25-35 are computed by `Processes #1-4`.
+* * Features 37-39 are computed by `Processes #6`.
+
+ 
