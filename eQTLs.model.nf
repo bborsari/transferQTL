@@ -291,6 +291,7 @@ byAssay_summary_table_ch
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Process #4: Merge all summary tables by 
  * assay into a single file
+ * The output of this process provides features 25-35 of the model
  */
 process merge_byAssay_summary_table {
 
@@ -342,8 +343,9 @@ tissue_assay_agg_ch_b
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Process #5: Prepare a summary table by tissue
- * aka for each tissue register presence/absence
- * of peaks for every assay
+ * aka for each SNP register presence/absence
+ * of peaks of all assays performed in a given tissue.
+ * The output of this process provides features 4-16 of the model.
  */
 process build_table_byTissue {
 
