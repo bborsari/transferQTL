@@ -154,5 +154,5 @@ SNP                        is_eQTL  ATAC  CTCF  DNase  H3K27ac  H3K27me3  H3K36m
 chr10_100004826_100004827  y        0     0     0      0        0         0         1        0        0        0       0                1    5092          0.314238  1.27037111031612  1              0        0.296296   0          0.52       0           0           0          0       0         0                  0        0       0        0.137448   1.57745    0.438172    0.568175   0.0815184  0.0446231  0.0269283  3.48443e-05  0
 ```
 * **Model prediction**.
-The pipeline trains a random forest model for every pair of donor-target tissues using the [R package caret](https://topepo.github.io/caret/) and by implementing a 5-fold cross-validation schema (`Process #8`).
+The pipeline trains a random forest model for every pair of donor-target tissues using the [R package caret](https://topepo.github.io/caret/) and by implementing a 5-fold cross-validation schema (`Process #8`). The model predictions are validated against the GTEx eQTL catalog for a given target tissue.
 Results of the prediction are stored inside `results/output.objs`.
