@@ -4,7 +4,7 @@ A Nextflow pipeline for predicting tissue-active eQTLs from chromatin features.
 
 The pipeline performs the following analysis steps:
 
-* Feature extraction and preparation based on EN-TEx functional genomics assays. 
+* Feature extraction based on EN-TEx functional genomics assays. 
 * Prediction of donor-tissue eQTLs active in a target tissue (using Random Forest).
 
 
@@ -138,4 +138,4 @@ chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0
 The output folder can be specified with `--outFolder`.  
 
 * Feature extraction. This involves multiple steps:
-** 
+  > Intersect donor-tissue eQTLs with peaks from functional genomics  

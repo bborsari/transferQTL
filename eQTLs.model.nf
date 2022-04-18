@@ -409,6 +409,7 @@ Channel.of(file(params.eqtls_dt), file(params.repeats), file(params.cCREs), file
  * 1. are TSS-proximal (aka they intersect annotated TSSs)
  * 2. are outside repeated regions
  * 3. are inside ENCODE cCREs
+ * The output of this process provides features 37-39
  */
 process get_additional_features_b {
 
