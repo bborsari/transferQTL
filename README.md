@@ -6,7 +6,7 @@ The pipeline performs the following analysis steps:
 
 * Feature extraction based on EN-TEx functional genomics assays. 
 * Prediction of donor-tissue eQTLs active in a target tissue (using Random Forest).
-For more details see [pipeline results] (https://github.com/bborsari/eQTLs.model-nf#pipeline-results).
+For more details see [pipeline results](https://github.com/bborsari/eQTLs.model-nf#pipeline-results).
 
 ![](https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/schema.png)
 
@@ -137,7 +137,7 @@ chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0
 
 ## Pipeline results
 
-The output folder can be specified with `--outFolder`.  
+The output folder can be specified with `--outFolder` (default: `results`).  
 
 * **Feature extraction**. We employ [39 features](https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/features.pdf) in the predictions.
   * Feature 1 is computed by `Process #7`.
@@ -145,12 +145,14 @@ The output folder can be specified with `--outFolder`.
   * Features 4-15 are computed by `Processes #1,2,5`.
   * Features 17-24 are provided by the user (`--index`).
   * Features 25-35 are computed by `Processes #1-4`.
-  * Features 37-39 are computed by `Processes #6`.
+  * Features 37-39 are computed by `Process #6`.
 
-The table containing information for all features is stored inside `outFolder/input.tables`. See example below:
+The table containing information for all features is stored inside `results/input.tables`. See example below:
 
 ```
 SNP                        is_eQTL  ATAC  CTCF  DNase  H3K27ac  H3K27me3  H3K36me3  H3K4me1  H3K4me3  H3K9me3  POLR2A  POLR2AphosphoS5  sum  tss_distance  slope     cv                is_out_repeat  is_cCRE  H3K27ac_p  H3K4me3_p  H3K4me1_p  H3K27me3_p  H3K36me3_p  H3K9me3_p  CTCF_p  POLR2A_p  POLR2AphosphoS5_p  EP300_p  ATAC_p  DNase_p  H3K27ac_k  H3K4me1_k  H3K27me3_k  H3K9me3_k  CTCF_k     POLR2A_k   ATAC_k     DNase_k      is_proximal
 chr10_100004826_100004827  y        0     0     0      0        0         0         1        0        0        0       0                1    5092          0.314238  1.27037111031612  1              0        0.296296   0          0.52       0           0           0          0       0         0                  0        0       0        0.137448   1.57745    0.438172    0.568175   0.0815184  0.0446231  0.0269283  3.48443e-05  0
 ```
 * **Model prediction**.
+The pipeline trains a random forest model for every pair of donor-target tissues using the [R package caret](https://topepo.github.io/caret/) and by implementing a 5-fold cross-validation schema (`Process #8`).
+Results of the prediction are stored inside `results/output.objs`.
