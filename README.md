@@ -139,7 +139,7 @@ chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0
 
 The output folder can be specified with `--outFolder`.  
 
-* **Feature extraction** We employ [39 features](https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/features.pdf) in the predictions.
+* **Feature extraction**. We employ [39 features](https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/features.pdf) in the predictions.
   * Feature 1 is computed by `Process #7`.
   * Features 2-3 are provided by the user (`--eqtls_slope_distance_dt`).
   * Features 4-15 are computed by `Processes #1,2,5`.
@@ -147,4 +147,10 @@ The output folder can be specified with `--outFolder`.
   * Features 25-35 are computed by `Processes #1-4`.
   * Features 37-39 are computed by `Processes #6`.
 
- 
+The table containing information for all features is stored inside `outFolder/input.tables`. See example below:
+
+```
+SNP                        is_eQTL  ATAC  CTCF  DNase  H3K27ac  H3K27me3  H3K36me3  H3K4me1  H3K4me3  H3K9me3  POLR2A  POLR2AphosphoS5  sum  tss_distance  slope     cv                is_out_repeat  is_cCRE  H3K27ac_p  H3K4me3_p  H3K4me1_p  H3K27me3_p  H3K36me3_p  H3K9me3_p  CTCF_p  POLR2A_p  POLR2AphosphoS5_p  EP300_p  ATAC_p  DNase_p  H3K27ac_k  H3K4me1_k  H3K27me3_k  H3K9me3_k  CTCF_k     POLR2A_k   ATAC_k     DNase_k      is_proximal
+chr10_100004826_100004827  y        0     0     0      0        0         0         1        0        0        0       0                1    5092          0.314238  1.27037111031612  1              0        0.296296   0          0.52       0           0           0          0       0         0                  0        0       0        0.137448   1.57745    0.438172    0.568175   0.0815184  0.0446231  0.0269283  3.48443e-05  0
+```
+* **Model prediction**.
