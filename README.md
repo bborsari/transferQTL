@@ -147,7 +147,7 @@ The output folder can be specified with `--outFolder` (default: `results`).
   * Features 25-35 are computed by `Processes #1-4`.
   * Features 37-39 are computed by `Process #6`.
 
-The table containing information for all features is stored inside `results/input.tables`. See example below:
+The pipeline produces a final `SNPs x features` table for every pair of donor-target tissues. These tables are stored inside `results/input.tables`. See example below:
 
 ```
 SNP                        is_eQTL  ATAC  CTCF  DNase  H3K27ac  H3K27me3  H3K36me3  H3K4me1  H3K4me3  H3K9me3  POLR2A  POLR2AphosphoS5  sum  tss_distance  slope     cv                is_out_repeat  is_cCRE  H3K27ac_p  H3K4me3_p  H3K4me1_p  H3K27me3_p  H3K36me3_p  H3K9me3_p  CTCF_p  POLR2A_p  POLR2AphosphoS5_p  EP300_p  ATAC_p  DNase_p  H3K27ac_k  H3K4me1_k  H3K27me3_k  H3K9me3_k  CTCF_k     POLR2A_k   ATAC_k     DNase_k      is_proximal
