@@ -19,57 +19,62 @@
  */
 
 
-// Define parameters
-// Most of them are defined in the config file
-
-params.index = null
-params.outFolder = 'results'
-
 
 // Print usage
 
 if (params.help) {
     log.info ''
-    log.info 'eQTLs.model-nf: A Nextflow pipeline for predicting tissue-active eQTLs from epigenetics features.'
+    log.info 'eQTLs.model-nf: A Nextflow pipeline for predicting tissue-active eQTLs.'
     log.info '=============================================================================================='
-    log.info 'The pipeline takes as input one-gene eQTLs from a donor tissue and predicts which of them are active in a target tissue.'
+    log.info 'The pipeline takes as input eQTLs from a donor tissue and predicts which of them are active in one or more target tissues.'
     log.info ' '
     log.info 'Usage: '
     log.info '    nextflow run eQTLs.model.nf [options]'
     log.info ''
     log.info 'Parameters:'
-    log.info ' --index			    Index file containing target tissue info.'
-    log.info ' --outFolder	            Output directory (default: results).'
-    log.info ' --dt			    Donor tissue providing the list of eQTLs to be predicted in a target tissue.'
-    log.info ' --eqtls_dt		    BED file containing all eQTLs in the donor tissue (chrom, start, end, tissue). NOTE: coordinates are 0-based.'
-    log.info ' --eqtls_slope_distance_dt    File containing SNP, gene_id, tss_distance, slope for every eQTL-gene pair in donor tissue. This info is obtained from the GTEx file'
-    log.info ' --eqtls_oneGene_dt           File containing one-gene eQTLs in the donor tissue (chrom_start_end). NOTE: coordinates are 0-based.'
-    log.info ' --exp_list		    File containing a list of all EN-TEx functional genomics experiments used for the predictions (bigBed file_id, target, tissue). bigBed = peaks file; target = histone mark / TF / ATAC / DNase.' 
-    log.info ' --bigbed_folder              Folder containing the files listed in "exp_list".'
-    log.info ' --entex_rnaseq_m             Matrix of TPM values for genes (rows) across samples (columns). NOTE: the file is gzipped.'
-    log.info ' --TSSs			    BED file containing all non-redundant TSSs +/- 2 Kb (if two isoforms have the same TSS, it will be counted only once). Chrom, start, end, transcript_id, placeholder, strand, gene_id.'        
-    log.info ' --cCREs			    BED file containing GRCh38 cCREs from ENCODE3.'
-    log.info ' --repeats             	    BED file containing repeated elements in GRCh38. NOTE: the file is gzipped.'
-    log.info ' --keep_only_tested_snps      Whether the prediction should be restrited to SNPs tested in the target tissue by GTEx (default: false).'
+    log.info ' --dt			    Donor tissue.'
+    log.info ' --eqtls_dt		    Donor-tissue eQTLs.'
+    log.info ' --eqtls_slope_distance_dt    Slope and TSS-distance of donor-tissue eQTLs.'
+    log.info ' --eqtls_oneGene_dt           Donor-tissue eQTLs linked to only one gene.'
+    log.info ' --exp_list		    Functional genomics experiments used for feature extraction.'
+    log.info ' --bigbed_folder              Directory containing peak-calling files.'
+    log.info ' --entex_rnaseq_m             EN-TEx gene expression matrix.'
+    log.info ' --TSSs			    List of annotated TSSs.'
+    log.info ' --cCREs			    GRCh38 cCREs from ENCODE3.'
+    log.info ' --repeats             	    GRCh38 repeats.'
+    log.info ' --keep_only_tested_snps      Whether to restrict the prediction to donor-tissue eQTLs tested in the target tissue (default: false).'
+    log.info ' --index			    Index file with target tissue info.'
+    log.info ' --outFolder		    Output directory (default: results).'
     log.info ''
     exit(1)
 }
 
 
+/* ~~~~~~~~~~~~~~~
+ * BEGIN
+ * ~~~~~~~~~~~~~~~
+ */
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// create a channel that contains:
-// 1. donor_tissue eQTLs
-// 2. folder w/ bigBed files
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Create a channel that contains:
+ * 1. donor_tissue eQTLs
+ * 2. folder w/ bigBed peak files for feature extraction
+ */
+
 Channel.of(file(params.eqtls_dt), params.bigbed_folder)
 .collect()
 .set{start_ch}
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// create channels that contain: 
-// (a): target_tissue, target_tissue eQTLs (eqtls_tt), 
-// (b): target_tissue, target_tissue tested snps (tested_tt)
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Create channels that contain: 
+ * (a): target_tissue, target_tissue eQTLs (eqtls_tt), 
+ * (b): target_tissue, target_tissue tested snps (tested_tt)
+ * (c): target_tissue, table of chromatin features' signal around the SNV (signal_table_tt)
+ */
+ 
 index = file(params.index)
 
 Channel.from(index.readLines())
@@ -88,32 +93,36 @@ Channel.from(index.readLines())
 }.set{tt_ch}
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// create a channel that contains,
-// for every bigBed file,
-// 1. file_id
-// 2. target_assay (either histone mark, TF, ATAC, DNase)
-// 3. tissue in which the experiment was performed (can be also dt)
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Create a channel that contains,
+ * for every bigBed file,
+ * 1. file_id
+ * 2. assay_name (either histone mark, TF, ATAC, DNase)
+ * 3. tissue in which the experiment was performed (can include also dt)
+ */
 exps = file(params.exp_list)
 
 Channel.from(exps.readLines())
 .map { line ->
   def list = line.tokenize()
   def file_id = list[0]
-  def target_assay = list[1]
+  def assay_name = list[1]
   def tissue = list[2]
-  [ file_id, target_assay, tissue ]
+  [ file_id, assay_name, tissue ]
 }.set{bigbed_ch}
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// create a channel that contains,
-// for every bigBed file,
-// 1. donor_tissue eQTLs
-// 2. bigBed file
-// 3. file_id
-// 4. target_assay (either histone mark, TF, ATAC, DNase)
-// 5. tissue
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Create a channel that contains,
+ * for every bigBed file,
+ * 1. donor_tissue eQTLs
+ * 2. bigBed file
+ * 3. file_id
+ * 4. assay_name (either histone mark, TF, ATAC, DNase)
+ * 5. tissue
+ */
 start_ch
 .combine(bigbed_ch)
 .map { it ->
@@ -122,10 +131,12 @@ start_ch
 .set{bedtools_ch}
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// intersect eQTLs from donor tissue
-// w/ histone marks / TFs / ATAC and DNase
-// in every other tissue
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Process #1: Intersect donor-tissue eQTLs
+ * w/ peaks of histone marks / TFs / ATAC and DNase
+ * in every specified target tissue
+ */
 process bedtools_intersect {
 
   publishDir "${params.outFolder}/bedfiles", overwrite: false
@@ -133,10 +144,10 @@ process bedtools_intersect {
   conda '/users/rg/bborsari/.conda/envs/ENCODE_RC/'
 
   input:
-  tuple file(eqtls_dt), file(bigbed), file_id, target, tissue from bedtools_ch
+  tuple file(eqtls_dt), file(bigbed), file_id, assay_name, tissue from bedtools_ch
 
   output:
-  tuple target, tissue, file("${file_id}.bed") into aggregate_ch
+  tuple assay_name, tissue, file("${file_id}.bed") into aggregate_ch
 
   script:
 
@@ -152,11 +163,12 @@ process bedtools_intersect {
 }
 
 
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // create a channel that contains,
-// for a given target and tissue,
+// for a given assay and tissue,
 // 1. donor_tissue eQTLs
-// 2. target_assay
+// 2. assay_name
 // 3. tissue
 // 4. tables of presence/absence of peaks
 Channel.of(file(params.eqtls_dt))
@@ -297,7 +309,7 @@ process merge_byTarget_summary_table {
 // for every tissue that is not the donor_tissue,
 // 1. target_tissue
 // 2. target_tissue eQTLs
-// 3. target_tissue tables of presence/absence peaks for every target_assay
+// 3. target_tissue tables of presence/absence peaks for every assay_name
 // 4. donor_tissue eQTLs
 Channel.of(file(params.eqtls_dt))
 .collect()
