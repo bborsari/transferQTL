@@ -1,4 +1,4 @@
-# eqtls.model-nf
+# transferQTL-nf
 
 A Nextflow pipeline for predicting tissue-active eQTLs from chromatin features.
 
@@ -6,9 +6,9 @@ The pipeline performs the following analysis steps:
 
 * Feature extraction based on EN-TEx functional genomics assays. 
 * Prediction of donor-tissue eQTLs active in a target tissue (using Random Forest).
-For more details see [pipeline results](https://github.com/bborsari/eQTLs.model-nf#pipeline-results).
+For more details see [pipeline results](https://github.com/bborsari/transferQTL#pipeline-results).
 
-![](https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/schema.png)
+![](https://github.com/bborsari/transferQTL/blob/main/wiki.images/schema.png)
 
 The pipeline uses [Nextflow](http://www.nextflow.io) as the execution backend. Please check [Nextflow documentation](http://www.nextflow.io/docs/latest/index.html) for more information.
 
@@ -22,25 +22,25 @@ The pipeline uses [Nextflow](http://www.nextflow.io) as the execution backend. P
 Launching the pipeline with the `--help` parameter shows the help message:
 
 ```
-nextflow run eQTLs.model.nf --help
+nextflow run transferQTL.nf --help
 ```
 
 ```
 N E X T F L O W  ~  version 20.10.0
-Launching `eQTLs.model.nf` [reverent_heisenberg] - revision: c5d78a089d
+Launching `transferQTL.nf` [reverent_heisenberg] - revision: c5d78a089d
 
 eQTLs.model-nf: A Nextflow pipeline for predicting tissue-active eQTLs.
 ==============================================================================================
 The pipeline takes as input eQTLs from a donor tissue and predicts which of them are active in one or more target tissues.
 
 Usage:
-nextflow run eQTLs.model.nf [options]
+nextflow run transferQTL.nf [options]
 
 Parameters:
 --dt			    	Donor tissue.
 --eqtls_dt		    	Donor-tissue eQTLs.
 --eqtls_slope_distance_dt    	Slope and TSS-distance of donor-tissue eQTLs.
---eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one gene.
+--eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one gene (eQTLs with multiple eGenes are filtered out).
 --exp_list		    	Functional genomics experiments used for feature extraction.
 --bigbed_folder              	Directory containing peak-calling files.
 --entex_rnaseq_m             	EN-TEx gene expression matrix.
@@ -54,7 +54,7 @@ Parameters:
 
 ## Input data and files format
 
-`eQTLs.model-nf` requires the following input data:
+`transferQTL.nf` requires the following input data:
 
 * **Donor tissue** (`--dt`). The tissue providing the source catalog of eQTLs. The pipeline will predict whether these eQTLs are active in one or more target tissues. Example: `Lung`
 
@@ -139,7 +139,7 @@ chr1_10000043_10000044	0.0502729	0.580827	0.242431	0.0718333	0.136759	0.021416	0
 
 The output folder can be specified with `--outFolder` (default: `results`).  
 
-* **Feature extraction**. We employ [39 features](https://github.com/bborsari/eQTLs.model-nf/blob/main/wiki.images/features.pdf) in the predictions.
+* **Feature extraction**. We employ [39 features](https://github.com/bborsari/transferQTL/blob/main/wiki.images/features.pdf) in the predictions.
   * Feature 1 is computed by `Process #7`.
   * Features 2-3 are provided by the user (`--eqtls_slope_distance_dt`).
   * Features 4-15 are computed by `Processes #1,2,5`.
