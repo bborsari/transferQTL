@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2021, Beatrice Borsari
+ * Copyright (c) 2022, Beatrice Borsari
  *
- * This file is part of 'eQTLs.model-nf':
+ * This file is part of 'transferQTL':
  * A Nextflow pipeline for predicting tissue-active eQTLs from chromatin features.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,18 +24,18 @@
 
 if (params.help) {
     log.info ''
-    log.info 'eQTLs.model-nf: A Nextflow pipeline for predicting tissue-active eQTLs.'
+    log.info 'transferQTL: A Nextflow pipeline for predicting tissue-active eQTLs.'
     log.info '=============================================================================================='
     log.info 'The pipeline takes as input eQTLs from a donor tissue and predicts which of them are active in one or more target tissues.'
     log.info ' '
     log.info 'Usage: '
-    log.info '    nextflow run eQTLs.model.nf [options]'
+    log.info '    nextflow run transferQTL.nf [options]'
     log.info ''
     log.info 'Parameters:'
     log.info ' --dt			    Donor tissue.'
     log.info ' --eqtls_dt		    Donor-tissue eQTLs.'
     log.info ' --eqtls_slope_distance_dt    Slope and TSS-distance of donor-tissue eQTLs.'
-    log.info ' --eqtls_oneGene_dt           Donor-tissue eQTLs linked to only one gene.'
+    log.info ' --eqtls_oneGene_dt           Donor-tissue eQTLs linked to only one eGene (eQTLs with multiple eGenes are filtered out).'
     log.info ' --exp_list		    Functional genomics experiments used for feature extraction.'
     log.info ' --bigbed_folder              Directory containing peak-calling files.'
     log.info ' --entex_rnaseq_m             EN-TEx gene expression matrix.'
@@ -152,7 +152,7 @@ process bedtools_intersect {
 
   """
   # bedtools intersect
-  intersect.peaks.cosi.regions.sh --regions $eqtls_dt --peaks $bigbed --outFile ${file_id}.bed
+  intersect.peaks.regions.sh --regions $eqtls_dt --peaks $bigbed --outFile ${file_id}.bed
 
   # keep only eQTLs with an intersection
   awk '\$NF>0{print \$1"_"\$2"_"\$3}' ${file_id}.bed | sort -u > ${file_id}.bed.tmp 
@@ -369,7 +369,7 @@ process build_table_byTissue {
         if [ -s \$f ];
         then
 		assay="\$(basename \$f | awk '{split(\$1, a, "."); print a[2]}')"
-		~/bin/join.py -b ${tissue}.summary.table.peaks.tsv -a \$f --b_header |\
+		join.py -b ${tissue}.summary.table.peaks.tsv -a \$f --b_header |\
 		sed "1s|V1|\${assay}|" > ${tissue}.summary.table.peaks.tmp; 
 		mv ${tissue}.summary.table.peaks.tmp ${tissue}.summary.table.peaks.tsv;			
 	fi
