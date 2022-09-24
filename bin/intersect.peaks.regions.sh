@@ -5,7 +5,6 @@
 #********
 
 display_usage() { 
-	echo -e "DESCRIPTION: provided a .bed file of cosi/cosit regions and a .bed or .bigBed file of peaks, it returns, for each region, the intersecting peaks\n"
 	echo -e "\t--regions <bed file of desired regions>\n"
 	echo -e "\t--peaks <bed/bigBed files of peaks> (if multiple files, must be comma-separated)\n"
 	echo -e "\t--ext <bed/bigBed> (file extension of peaks; default: 'bigBed')\n"
