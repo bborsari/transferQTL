@@ -12,10 +12,12 @@ For more details see [pipeline results](https://github.com/bborsari/transferQTL#
 
 The pipeline uses [Nextflow](http://www.nextflow.io) as the execution backend. Please check [Nextflow documentation](http://www.nextflow.io/docs/latest/index.html) for more information.
 
-## Requirements
+## Requirements and dependencies
 
 - Unix-like operating system (Linux, MacOS, etc.)
 - Java 8 or later 
+- [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html)
+- R libraries: `data.table`, `caret`, `randomForest`, `pROC`, `mlbench`, `plotROC`, `MLeval`. 
 
 ## Pipeline usage
 
@@ -71,7 +73,7 @@ SNP			gene_id			tss_distance	slope
 chr1_64763_64764	ENSG00000227232.5	35211		0.370865
 ```
 
-* **Donor-tissue eQTLs linked to only one gene** (`--eqtls_oneGene_dt`). One-column file containing a list of eQTLs linked to only one gene in the donor tissue. See example below:
+* **Donor-tissue eQTLs linked to only one eGene** (`--eqtls_oneGene_dt`). One-column file containing a list of eQTLs linked to only one gene in the donor tissue. eQTLs associated with multiple eGenes are filtered out. See example below:
 
 ```
 chr1_64763_64764

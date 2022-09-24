@@ -138,9 +138,9 @@ start_ch
  */
 process bedtools_intersect {
 
-  publishDir "${params.outFolder}/bedfiles", overwrite: false
+  publishDir "${params.outFolder}/bedfiles", overwrite: true
 
-  conda '/users/rg/bborsari/.conda/envs/ENCODE_RC/'
+  conda "bioconda::bedtools"  
 
   input:
   tuple file(eqtls_dt), file(bigbed), file_id, assay_name, tissue from bedtools_ch
@@ -191,7 +191,7 @@ seed1_ch
  */
 process aggregate_exp {
 
-  publishDir "${params.outFolder}/agg.tables", overwrite: false
+  publishDir "${params.outFolder}/agg.tables", overwrite: true
 
   input:
   tuple file(eqtls_dt), assay, tissue, file(bed) from ready2aggregate_ch
@@ -245,7 +245,7 @@ seed2_ch
  */
 process build_table_byAssay {
 
-  publishDir "${params.outFolder}/assay.summary.tables", overwrite: false
+  publishDir "${params.outFolder}/assay.summary.tables", overwrite: true
 
   input:
   tuple file(eqtls_dt), assay, file(tsv) from ready2build_byAssay_summary_table_ch
@@ -295,7 +295,7 @@ byAssay_summary_table_ch
  */
 process merge_byAssay_summary_table {
 
-  publishDir "${params.outFolder}/assay.summary.tables", overwrite: false
+  publishDir "${params.outFolder}/assay.summary.tables", overwrite: true
 
   input:
   file merge_byAssay_summary_table_ch
@@ -349,7 +349,7 @@ tissue_assay_agg_ch_b
  */
 process build_table_byTissue {
 
-  publishDir "${params.outFolder}/tissue.summary.tables", overwrite: false
+  publishDir "${params.outFolder}/tissue.summary.tables", overwrite: true
 
   input:
   tuple tissue, file(eqtls_tt), file(tsv), file(eqtls_dt) from ready2build_byTissue_summary_table_ch
@@ -413,9 +413,9 @@ Channel.of(file(params.eqtls_dt), file(params.repeats), file(params.cCREs), file
  */
 process get_additional_features_b {
 
-  publishDir "${params.outFolder}/additional.features", overwrite: false
+  publishDir "${params.outFolder}/additional.features", overwrite: true
 
-  conda '/users/rg/bborsari/.conda/envs/ENCODE_RC/'
+  conda "bioconda::bedtools"
 
   input:
   tuple file(eqtls_dt), file(repeats), file(cCREs), file(TSSs) from ready2build_additional_features_ch_b
@@ -472,7 +472,7 @@ if (params.keep_only_tested_snps) {
 
   process build_input4model_1 {
 
-  publishDir "${params.outFolder}/input.tables", overwrite: false
+  publishDir "${params.outFolder}/input.tables", overwrite: true
 
   input:
   tuple tissue, file(summary_table_tt), file(tested_snps_tt), file(signal_table_tt) from ready2build_input4model_ch
@@ -495,7 +495,7 @@ else {
   
   process build_input4model_2 {
 
-  publishDir "${params.outFolder}/input.tables", overwrite: false
+  publishDir "${params.outFolder}/input.tables", overwrite: true
 
   input:
   tuple tissue, file(summary_table_tt), file(tested_snps_tt), file(signal_table_tt) from ready2build_input4model_ch
@@ -521,7 +521,7 @@ else {
  */
 process run_model {
 
-publishDir "${params.outFolder}/output.objs", overwrite: false
+publishDir "${params.outFolder}/output.objs", overwrite: true
 
 input:
 tuple tissue, file("${tissue}.input4model.tsv") from input4model_ch
