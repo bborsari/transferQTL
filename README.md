@@ -1,4 +1,4 @@
-# transferQTL-nf
+# transferQTL
 
 A Nextflow pipeline for predicting tissue-active eQTLs from chromatin features.
 
@@ -29,7 +29,7 @@ nextflow run transferQTL.nf --help
 N E X T F L O W  ~  version 20.10.0
 Launching `transferQTL.nf` [reverent_heisenberg] - revision: c5d78a089d
 
-eQTLs.model-nf: A Nextflow pipeline for predicting tissue-active eQTLs.
+transferQTL: A Nextflow pipeline for predicting tissue-active eQTLs.
 ==============================================================================================
 The pipeline takes as input eQTLs from a donor tissue and predicts which of them are active in one or more target tissues.
 
@@ -40,7 +40,7 @@ Parameters:
 --dt			    	Donor tissue.
 --eqtls_dt		    	Donor-tissue eQTLs.
 --eqtls_slope_distance_dt    	Slope and TSS-distance of donor-tissue eQTLs.
---eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one gene (eQTLs with multiple eGenes are filtered out).
+--eqtls_oneGene_dt           	Donor-tissue eQTLs linked to only one eGene (eQTLs with multiple eGenes are filtered out).
 --exp_list		    	Functional genomics experiments used for feature extraction.
 --bigbed_folder              	Directory containing peak-calling files.
 --entex_rnaseq_m             	EN-TEx gene expression matrix.
@@ -101,7 +101,7 @@ chrX	100634688	100638689	ENST00000496771.5	0	-	ENSG00000000003.14
 
 * **GRCh38 repeats** (`--repeats`). [bgzip](http://www.htslib.org/doc/bgzip.html)-BED file containing repeated elements annotated in GRCh38. The file was downloaded from http://genome.ucsc.edu/cgibin/hgTables, after setting `group` = `repeats` and `track` = `Repeatmasker`.
 
-* **Keep only tested SNPs** (`--keep_only_tested_snps`). Whether to restrict the predictions only to donor-tissue eQTLs tested by GTEx for eQTL-gene association in the target tissue (`default` = `false`). The model performance can only be evaluated with SNPs that were tested for being eQTLs in the target tissue. 
+* **Keep only tested SNPs** (`--keep_only_tested_snps`). Whether to restrict the predictions only to donor-tissue eQTLs tested by GTEx for eQTL-gene association in the target tissue (`default` = `false`).
 
 * **Index file with target tissue info** (`--index`). tsv file containing relevant info for the target tissue(s). Here is an example of the file format:
 
