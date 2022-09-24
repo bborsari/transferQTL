@@ -17,6 +17,7 @@ The pipeline uses [Nextflow](http://www.nextflow.io) as the execution backend. P
 - Unix-like operating system (Linux, MacOS, etc.)
 - Java 8 or later 
 - [bedtools intersect](https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html)
+- python
 - R libraries: `data.table`, `caret`, `randomForest`, `pROC`, `mlbench`, `plotROC`, `MLeval`. 
 
 ## Pipeline usage
